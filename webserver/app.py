@@ -28,9 +28,7 @@ login_manager.login_message = 'please login!'
 login_manager.session_protection = 'strong'
 logger = logging.getLogger(__name__)
 
-@login_manager.user_loader
-def load_user(user_id):
-    return None
+
 
 # Here we create a test table and insert some values in it
 # engine.execute("""DROP TABLE IF EXISTS test;""")
@@ -41,6 +39,21 @@ def load_user(user_id):
 # engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
 class User(flask_login.UserMixin):
     pass
+    # def __init__(self, id, active=True):
+    #     self.id = id
+    #     self.active = active
+
+@login_manager.user_loader
+def load_user(user_id):
+    cursor = g.conn.execute("SELECT user_name FROM User_")
+    uids = []
+    for result in cursor:
+        uids.append(result['user_name'])
+    if user_id not in uids:
+        return
+    user = User()
+    user.id = user_id
+    return user
 
 @app.before_request
 def before_request():
@@ -73,16 +86,31 @@ def teardown_request(exception):
 @flask_login.login_required
 def home():
     # if session.get('UName'):
-    cursor = g.conn.execute("SELECT event_name FROM Event")
+
+    cursor = g.conn.execute("SELECT event_name, likes, event_date, tag FROM Event")
     names = []
+    likes = []
+    event_dates = []
+    tags = []
     for result in cursor:
         names.append(result['event_name'])  # can also be accessed using result[0]
+        likes.append(result['likes'])
+        event_dates.append(result['event_date'])
+        tags.append(result['tag'])
     cursor.close()
 
-    context = dict(data = names)
-    context2 = dict(n = flask_login.current_user.id)
+    cursor = g.conn.execute("SELECT count(*) FROM Event")
+    a = cursor.fetchone()
+    count = a[0]
 
-    return render_template('home.html', **context, **context2)
+    count_dic = dict(count = count)
+    names_dic = dict(names = names)
+    user_id_dic = dict(n = flask_login.current_user.id)
+    likes_dic = dict(likes=likes)
+    event_dates_dic = dict(event_dates=event_dates)
+    tags_dic = dict(tags=tags)
+    return render_template('home.html', **names_dic, **user_id_dic, **likes_dic, **event_dates_dic, **tags_dic, **count_dic)
+    # return render_template('home.html', **datas_dic)
     # else:
     #     return login()
     # if not session.get('logged_in'):
@@ -144,6 +172,36 @@ def logout():
 @app.route('/register',methods=['GET'])
 def do_register():
     return render_template('register.html')
+
+@app.route('/post',methods=['GET'])
+@flask_login.login_required
+def post():
+    return render_template('post.html')
+
+@app.route('/do_post',methods=['GET', 'POST'])
+def do_post():
+    t1 = {"event_name": request.form['eventname'],"event_date" : request.form['eventdate'], "description" : request.form['description']}
+    cursor = g.conn.execute(text(
+        """
+            insert into  Event(event_name, event_date, description)
+            values
+            (:event_name, :event_date, :description)
+        """
+    ),t1)
+
+    event = cursor.fetchone()
+    eid = event['eid']
+
+    t2 = {"eid": eid, "location": request.form['location']}
+    g.conn.execute(text(
+        """
+            insert into  Take_Places(eid, address)
+            values
+            (:eid, :location)
+        """
+    ),t2)
+
+
 
 @app.route('/createUser',methods=['GET', 'POST'])
 def do_createUser():
