@@ -26,32 +26,25 @@
 	      <section>
 	        <h1>Event Menu</h1>
 	        <div id="github-icons"></div>
-              <!--<div> Welcome  {{n}} </div>-->
-              <div>
-                {% for i in range(0,count)%}
-                <!--<div class="card-body">-->
-                  <!--<h1 class="card-title pricing-card-title">{{n}}<small class="text-muted">/ mo</small></h1>-->
-                  <!--<ul class="list-unstyled mt-3 mb-4">-->
-                    <!--<li>AAA</li>-->
-                    <!--<li>BBB</li>-->
-                    <!--<li>CCC</li>-->
-                    <!--<li>DDD</li>-->
-                  <!--</ul>-->
-                  <!--<button type="button" class="btn btn-lg btn-block btn-primary">View</button>-->
-                <!--</div>-->
-                <div class="card-body">
-                  <h1 class="card-title pricing-card-title">{{names[i]}}
-                  <ul class="list-unstyled mt-3 mb-4">
-                    <li>Likes: {{likes[i]}}</li>
-                    <li>Date: {{event_dates[i]}}</li>
-                    <li>Tag: {{tags[i]}}</li>
-                    <button type="button" class="btn btn-lg btn-block btn-primary">View</button>
-                  </ul>
+                <form action="/search" method="POST">
+                    <div class="login">
+                        <div class="login-screen">
+                            <div class="app-title">
+                                <h1>Post Event</h1>
+                            </div>
 
-                </div>
-
-                {% endfor %}
-              </div>
+                            <div class="login-form">
+                                <div class="control-group">
+                                    <!--<span> Event Name: </span>-->
+                                <input type="text" class="login-field" value="" placeholder="event_search" name="event_search">
+                                <label class="login-field-icon fui-user" for="login-name"></label>
+                                </div>
+                                <input type="submit" value="Search" class="btn btn-primary btn-large btn-block" >
+                                <br>
+                            </div>
+                        </div>
+                    </div>
+                </form>
 	      </section>
 	    </div>
 	  </main>
@@ -62,11 +55,6 @@
 	  <div class="mm-menu__header">
 	    <h2 class="mm-menu__title">{{n}}</h2>
 	  </div>
-	    <li class="mm-menu__item">
-	      <a class="mm-menu__link" href="/">
-	        <span class="mm-menu__link-text"><i class="md md-home"></i> Home</span>
-	      </a>
-	    </li>
 	  <ul class="mm-menu__items">
 	    <li class="mm-menu__item">
 	      <a class="mm-menu__link" href="#">
@@ -74,7 +62,7 @@
 	      </a>
 	    </li>
 	    <li class="mm-menu__item">
-	      <a class="mm-menu__link" href="/post">
+	      <a class="mm-menu__link" href="#">
 	        <span class="mm-menu__link-text"><i class="md md-home"></i> Post</span>
 	      </a>
 	    </li>
@@ -116,15 +104,3 @@
 	</script>
 </body>
 </html>
-  <!--<h1>Events: </h1>-->
-  <!--<div> Welcome  {{n}} </div>-->
-  <!--<div>-->
-    <!--{% for n in data %}-->
-    <!--<div>{{n}}</div>-->
-    <!--{% endfor %}-->
-  <!--</div>-->
-
-<!--<form action="/logout">-->
-    <!--<input type="submit" value="Log Out" />-->
-<!--</form>-->
-
