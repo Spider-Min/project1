@@ -87,16 +87,18 @@ def teardown_request(exception):
 def home():
     # if session.get('UName'):
 
-    cursor = g.conn.execute("SELECT event_name, likes, event_date, tag FROM Event")
+    cursor = g.conn.execute("SELECT eid, event_name, likes, event_date, tag FROM Event")
     names = []
     likes = []
     event_dates = []
     tags = []
+    ids = []
     for result in cursor:
         names.append(result['event_name'])  # can also be accessed using result[0]
         likes.append(result['likes'])
         event_dates.append(result['event_date'])
         tags.append(result['tag'])
+        ids.append(result['eid'])
     cursor.close()
 
     cursor = g.conn.execute("SELECT count(*) FROM Event")
@@ -109,7 +111,8 @@ def home():
     likes_dic = dict(likes=likes)
     event_dates_dic = dict(event_dates=event_dates)
     tags_dic = dict(tags=tags)
-    return render_template('home.html', **names_dic, **user_id_dic, **likes_dic, **event_dates_dic, **tags_dic, **count_dic)
+    ids_dic = dict(ids=ids)
+    return render_template('home.html', **ids_dic, **names_dic, **user_id_dic, **likes_dic, **event_dates_dic, **tags_dic, **count_dic)
     # return render_template('home.html', **datas_dic)
     # else:
     #     return login()
@@ -179,6 +182,7 @@ def post():
     return render_template('post.html')
 
 @app.route('/do_post',methods=['GET', 'POST'])
+@flask_login.login_required
 def do_post():
     t1 = {"event_name": request.form['eventname'],"event_date" : request.form['eventdate'], "description" : request.form['description'], "tag": request.form['tag']}
     cursor = g.conn.execute(text(
@@ -209,32 +213,86 @@ def do_post():
     ),t2)
     return home()
 
+@app.route('/search',methods=['GET', 'POST'])
+@flask_login.login_required
+def search():
+    return render_template("search.html")
 
 
-@app.route('/createUser',methods=['GET', 'POST'])
+@app.route('/search_result',methods=['GET', 'POST'])
+@flask_login.login_required
+def search_result():
+    results = []
+    t = {"event_search": request.form['event_search']}
+
+    cursor1 = g.conn.execute(text(
+        """
+            select eid, event_name, likes, tag, description, address
+            from Event natural join Take_Places
+            where event_name = :event_search or tag = :event_search or address = :event_search 
+        """
+    ),t)
+    for result in cursor1:
+        row = []
+        row.append(result['event_name'])
+        row.append(result['likes'])
+        row.append(result['tag'])
+        row.append(result['description'])
+        row.append(result['address'])
+        row.append(result['eid'])
+        results.append(row)
+    events_dic = dict(events = results)
+
+
+
+    cursor2 = g.conn.execute(text(
+        """
+            select count(*) from Event natural join Take_Places
+            where event_name = :event_search or tag = :event_search or address =:event_search 
+        """
+    ),t)
+    tmp = cursor2.fetchone()
+    count = tmp[0]
+    count_dic = dict(count = count)
+    return render_template("search_result.html", **events_dic, **count_dic)
+
+
+@app.route('/createUser', methods=['GET', 'POST'])
 def do_createUser():
-    t = {"user_name": request.form['username'],"password" : request.form['password']}
+    t = {"user_name": request.form['username'], "password": request.form['password']}
     g.conn.execute(text(
         """
             insert into  User_(user_name, password)
             values
             (:user_name, :password)
         """
-    ),t)
+    ), t)
 
-    # cursor = g.conn.execute("""
-    # select *
-    # from User_
-    # ;""")
-    # names = []
-    # for result in cursor:
-    #     names.append(result['user_name'])  # can also be accessed using result[0]
-    # cursor.close()
-    # context = dict(data=names)
-
-    # print(request.form['username'])
-    # print(request.form['password'])
     return render_template("login.html")
+
+@app.route('/view_event/<ID>',methods=['POST'])
+@flask_login.login_required
+def view_event(ID):
+    results = []
+    t = {"event_id": ID}
+
+    cursor = g.conn.execute(text(
+        """
+            select event_name, likes, tag, description, address
+            from Event natural join Take_Places
+            where eid= :event_id 
+        """
+    ),t)
+    for result in cursor:
+        row = []
+        row.append(result['event_name'])
+        row.append(result['likes'])
+        row.append(result['tag'])
+        row.append(result['description'])
+        row.append(result['address'])
+        results.append(row)
+    events_dic = dict(events = results)
+    return render_template('event_view.html', **events_dic)
 
 if __name__ == "__main__":
     app.secret_key = os.urandom(12)

@@ -26,7 +26,7 @@
 	      <section>
 	        <h1>Event Menu</h1>
 	        <div id="github-icons"></div>
-                <form action="/search" method="POST">
+                <form action="/search_result" method="POST">
                     <div class="login">
                         <div class="login-screen">
                             <div class="app-title">
@@ -55,6 +55,11 @@
 	  <div class="mm-menu__header">
 	    <h2 class="mm-menu__title">{{n}}</h2>
 	  </div>
+	    <li class="mm-menu__item">
+	      <a class="mm-menu__link" href="/">
+	        <span class="mm-menu__link-text"><i class="md md-home"></i> Home</span>
+	      </a>
+	    </li>
 	  <ul class="mm-menu__items">
 	    <li class="mm-menu__item">
 	      <a class="mm-menu__link" href="#">
@@ -62,12 +67,12 @@
 	      </a>
 	    </li>
 	    <li class="mm-menu__item">
-	      <a class="mm-menu__link" href="#">
+	      <a class="mm-menu__link" href="/post">
 	        <span class="mm-menu__link-text"><i class="md md-home"></i> Post</span>
 	      </a>
 	    </li>
 	    <li class="mm-menu__item">
-	      <a class="mm-menu__link" href="#">
+	      <a class="mm-menu__link" href="/search">
 	        <span class="mm-menu__link-text"><i class="md md-person"></i> Search</span>
 	      </a>
 	    </li>
