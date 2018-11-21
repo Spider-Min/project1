@@ -180,17 +180,24 @@ def post():
 
 @app.route('/do_post',methods=['GET', 'POST'])
 def do_post():
-    t1 = {"event_name": request.form['eventname'],"event_date" : request.form['eventdate'], "description" : request.form['description']}
+    t1 = {"event_name": request.form['eventname'],"event_date" : request.form['eventdate'], "description" : request.form['description'], "tag": request.form['tag']}
     cursor = g.conn.execute(text(
         """
-            insert into  Event(event_name, event_date, description)
+            insert into  Event(event_name, event_date, description,tag)
             values
-            (:event_name, :event_date, :description)
+            (:event_name, :event_date, :description, :tag)
         """
     ),t1)
 
+    cursor = g.conn.execute(
+    """
+    select max(eid) from Event
+    
+    """)
+
+
     event = cursor.fetchone()
-    eid = event['eid']
+    eid = event[0]
 
     t2 = {"eid": eid, "location": request.form['location']}
     g.conn.execute(text(
@@ -200,6 +207,7 @@ def do_post():
             (:eid, :location)
         """
     ),t2)
+    return home()
 
 
 
